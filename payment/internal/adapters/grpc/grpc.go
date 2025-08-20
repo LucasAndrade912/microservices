@@ -17,7 +17,7 @@ func (a Adapter) Create(ctx context.Context, request *payment.CreatePaymentReque
 	result, err := a.api.Charge(ctx, newPayment)
 	code := status.Code(err)
 
-	if code == codes.InvalidArgument {
+	if code == codes.InvalidArgument || code == codes.DeadlineExceeded {
 		return nil, err
 	} else if err != nil {
 		return nil, status.New(codes.Internal, fmt.Sprintf("failed to charge. %v ", err)).Err()
