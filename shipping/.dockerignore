@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDEs
+.vscode
+.idea
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+# Não ignorar go.mod e go.sum - são necessários
+vendor/

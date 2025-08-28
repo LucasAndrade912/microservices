@@ -6,7 +6,6 @@ import (
 	"net"
 
 	"github.com/lucasandrade912/microservices-proto/golang/shipping"
-	"github.com/lucasandrade912/microservices/shipping/config"
 	"github.com/lucasandrade912/microservices/shipping/internal/ports"
 	"google.golang.org/grpc/reflection"
 
@@ -35,9 +34,8 @@ func (a Adapter) Run() {
 	grpcServer := grpc.NewServer()
 	a.server = grpcServer
 	shipping.RegisterShippingServer(grpcServer, a)
-	if config.GetEnv() == "development" {
-		reflection.Register(grpcServer)
-	}
+
+	reflection.Register(grpcServer)
 
 	log.Printf("starting shipping service on port %d ...", a.port)
 	if err := grpcServer.Serve(listen); err != nil {

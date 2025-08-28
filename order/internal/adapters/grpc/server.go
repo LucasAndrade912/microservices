@@ -7,7 +7,6 @@ import (
 	"net"
 
 	"github.com/lucasandrade912/microservices-proto/golang/order"
-	"github.com/lucasandrade912/microservices/order/config"
 	"github.com/lucasandrade912/microservices/order/internal/application/core/domain"
 	"github.com/lucasandrade912/microservices/order/internal/ports"
 	"google.golang.org/grpc"
@@ -57,9 +56,7 @@ func (a Adapter) Run() {
 	grpcServer := grpc.NewServer()
 	order.RegisterOrderServer(grpcServer, a)
 
-	if config.GetEnv() == "development" {
-		reflection.Register(grpcServer)
-	}
+	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(listen); err != nil {
 		log.Fatal("failed to serve grpc on port ")

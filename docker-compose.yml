@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # Banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: microservices-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: minhasenha
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pminhasenha"]
+      timeout: 20s
+      retries: 10
+
+    # Payment Service
+  payment:
+    build:
+      context: ..
+      dockerfile: microservices/payment/Dockerfile
+    container_name: microservices-payment
+    environment:
+      - DB_DRIVER=mysql
+      - DATA_SOURCE_URL=root:minhasenha@tcp(mysql:3306)/payment
+      - APPLICATION_PORT=3001
+      - ENV=production
+    ports:
+      - "3001:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Shipping Service
+  shipping:
+    build:
+      context: ..
+      dockerfile: microservices/shipping/Dockerfile
+    container_name: microservices-shipping
+    environment:
+      - DB_DRIVER=mysql
+      - DATA_SOURCE_URL=root:minhasenha@tcp(mysql:3306)/shipping
+      - APPLICATION_PORT=3002
+      - ENV=production
+    ports:
+      - "3002:3002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Order Service
+  order:
+    build:
+      context: ..
+      dockerfile: microservices/order/Dockerfile
+    container_name: order-service
+    environment:
+      - DATA_SOURCE_URL=root:minhasenha@tcp(mysql:3306)/order
+      - APPLICATION_PORT=3000
+      - PAYMENT_SERVICE_URL=payment:3001
+      - SHIPPING_SERVICE_URL=shipping:3002
+      - ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  microservices-network:
+    driver: bridge

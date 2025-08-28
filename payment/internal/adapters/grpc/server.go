@@ -6,7 +6,6 @@ import (
 	"net"
 
 	"github.com/lucasandrade912/microservices-proto/golang/payment"
-	"github.com/lucasandrade912/microservices/payment/config"
 	"github.com/lucasandrade912/microservices/payment/internal/ports"
 	"google.golang.org/grpc/reflection"
 
@@ -35,9 +34,8 @@ func (a Adapter) Run() {
 	grpcServer := grpc.NewServer()
 	a.server = grpcServer
 	payment.RegisterPaymentServer(grpcServer, a)
-	if config.GetEnv() == "development" {
-		reflection.Register(grpcServer)
-	}
+
+	reflection.Register(grpcServer)
 
 	log.Printf("starting payment service on port %d ...", a.port)
 	if err := grpcServer.Serve(listen); err != nil {
