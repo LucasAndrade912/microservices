@@ -1,12 +1,31 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+type Product struct {
+	ID          int64   `json:"id"`
+	ProductCode string  `json:"product_code"`
+	Name        string  `json:"name"`
+	UnitPrice   float32 `json:"unit_price"`
+	Stock       int32   `json:"stock"`
+	Active      bool    `json:"active"`
+}
 
 type OrderItem struct {
 	ProductCode string  `json:"product_code"`
 	UnitPrice   float32 `json:"unit_price"`
 	Quantity    int32   `json:"quantity"`
 }
+
+var (
+	ErrProductNotFound    = errors.New("product not found")
+	ErrProductInactive    = errors.New("product is inactive")
+	ErrInsufficientStock  = errors.New("insufficient stock")
+	ErrInvalidQuantity    = errors.New("quantity must be greater than zero")
+)
 
 type Order struct {
 	ID         int64       `json:"id"`
